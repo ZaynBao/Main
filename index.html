@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>  Fun Tools & Games for Kids with Autism</title>
+    <style>
+        :root {
+            --primary: #6A5ACD;
+            --secondary: #5DADE2;
+            --accent: #FF9966;
+            --background: #F8F9FA;
+            --text: #333333;
+            --success: #66CC99;
+            --card-bg: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito', 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 50px;
+            margin: 0 auto;
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-30px);
+        }
+
+        nav a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 10px 15px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .welcome-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .welcome-section p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .tools-section {
+            display: flex;
+            justify-content: center;
+            margin: 50px 0;
+        }
+
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .tool-image {
+            height: 200px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: var(--primary);
+        }
+
+        .tool-content {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .tool-content h3 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .tool-content p {
+            margin-bottom: 25px;
+            color: var(--text);
+            font-size: 1.2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            margin-top: 100px;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            margin: 0 20px 30px;
+            text-align: left;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .copyright {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                border-radius: 20px;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .tool-card {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">Zayn<span>bao</span></div>
+        <div class="tagline">Fun Tools & Games for Amazing Kids!</div>
+    </header>
+
+    <nav>
+        <a href="#tools">Tools</a>
+        <a href="#games">Games</a>
+    </nav>
+
+    <div class="container">
+        <section class="welcome-section">
+            <h2>Coming soon</h2>
+            <p>We've created a colorful world of fun and learning specially designed for children with autism. Explore
+                interactive tools and games that support development while bringing smiles!</p>
+        </section>
+
+        <section class="tools-section" id="tools">
+            <div class="tool-card">
+                <div class="tool-image">⏱️</div>
+                <div class="tool-content">
+                    <h3>Visual Timer</h3>
+                    <p>Our visual timer helps children understand time passing with clear visual cues. Perfect for
+                        activities, transitions, and building time awareness.</p>
+                    <a href="timer/index.html" class="btn">Open Timer</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Zaynbao</h3>
+                <p>Fun, accessible digital tools for children with autism.</p>
+            </div>
+        </div>
+
+        <div class="copyright">
+            <p>&copy; 2025 Zaynbao.com. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+
+</html>
