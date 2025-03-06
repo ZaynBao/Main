@@ -426,40 +426,56 @@ function resetTimer() {
 
 // Play completion sound
 // Improved playCompletionSound function for better mobile compatibility
+// Replace with this simpler, guaranteed-to-work solution
+
+// For the completion sound, use Web Audio API directly like the beep sound
 function playCompletionSound() {
     if (!soundEnabled) return;
     
     try {
-        // Mobile-compatible approach: use a global audio element that's pre-loaded
-        if (!window.koggAudio) {
-            // Create once and cache for future use
-            window.koggAudio = new Audio('kogg.ogg');
-            window.koggAudio.volume = 0.7;
-            window.koggAudio.load(); // Preload
-            
-            // Add error handler
-            window.koggAudio.addEventListener('error', function(e) {
-                console.log('Error loading kogg.ogg:', e);
-                createFallbackCompletionSound();
-            });
-        }
+        // Create audio context
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         
-        // Reset to beginning if it was played before
-        window.koggAudio.currentTime = 0;
+        // Generate a sequence of tones for "ta-da" sound
+        const now = audioContext.currentTime;
         
-        // Attempt to play with retry logic
-        const playPromise = window.koggAudio.play();
+        // First tone (C)
+        createCompletionTone(audioContext, now, 523.25, 0.3, 0.15);
         
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.log('Audio play error, using fallback:', error);
-                createFallbackCompletionSound();
-            });
-        }
-    } catch (audioError) {
-        console.log('Audio playback error:', audioError.message);
-        createFallbackCompletionSound();
+        // Second tone (E)
+        createCompletionTone(audioContext, now + 0.15, 659.25, 0.3, 0.15);
+        
+        // Third tone (G)
+        createCompletionTone(audioContext, now + 0.3, 783.99, 0.3, 0.15);
+        
+        // Final tone (C higher octave - triumphant ending)
+        createCompletionTone(audioContext, now + 0.45, 1046.50, 0.4, 0.3);
+        
+        console.log('Playing completion sound with Web Audio API');
+    } catch (e) {
+        console.log('Web Audio API not supported:', e.message);
     }
+}
+
+// Helper function to create a tone
+function createCompletionTone(audioContext, startTime, frequency, volume, duration) {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.value = frequency;
+    
+    // Shape the sound with an attack and release
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.05);
+    gainNode.gain.setValueAtTime(volume, startTime + duration - 0.05);
+    gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
 }
 
 // Fallback that uses the Web Audio API (similar to the beep sound)
