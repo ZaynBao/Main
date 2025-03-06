@@ -425,61 +425,120 @@ function resetTimer() {
 }
 
 // Play completion sound
+// Improved playCompletionSound function for better mobile compatibility
 function playCompletionSound() {
     if (!soundEnabled) return;
     
     try {
-        // Create an Audio object and load the kogg.ogg file
-        const audio = new Audio('kogg.ogg'); // Path adjusted to match repository structure
+        // Mobile-compatible approach: use a global audio element that's pre-loaded
+        if (!window.koggAudio) {
+            // Create once and cache for future use
+            window.koggAudio = new Audio('kogg.ogg');
+            window.koggAudio.volume = 0.7;
+            window.koggAudio.load(); // Preload
+            
+            // Add error handler
+            window.koggAudio.addEventListener('error', function(e) {
+                console.log('Error loading kogg.ogg:', e);
+                createFallbackCompletionSound();
+            });
+        }
         
-        // Set volume
-        audio.volume = 0.7;
+        // Reset to beginning if it was played before
+        window.koggAudio.currentTime = 0;
         
-        // Add event listeners to handle possible errors
-        audio.addEventListener('error', function(e) {
-            console.log('Audio error:', e);
-            // Only attempt fallback if there's an error with the file
-            createFallbackCompletionSound();
-        });
-        
-        // Preload the audio
-        audio.load();
-        
-        // Play the audio with multiple attempts in case of failure
-        const playPromise = audio.play();
+        // Attempt to play with retry logic
+        const playPromise = window.koggAudio.play();
         
         if (playPromise !== undefined) {
             playPromise.catch(error => {
-                console.log('Audio play error, retrying:', error);
-                
-                // Try again after a short delay
-                setTimeout(() => {
-                    audio.play().catch(e => {
-                        console.log('Second play attempt failed:', e);
-                        // Only use fallback if we can't play the audio file
-                        createFallbackCompletionSound();
-                    });
-                }, 100);
+                console.log('Audio play error, using fallback:', error);
+                createFallbackCompletionSound();
             });
         }
     } catch (audioError) {
         console.log('Audio playback error:', audioError.message);
-        // Only use fallback as a last resort
         createFallbackCompletionSound();
     }
 }
 
-// This is only for fallback if kogg.ogg can't be played
+// Fallback that uses the Web Audio API (similar to the beep sound)
 function createFallbackCompletionSound() {
-    console.log('Using fallback sound because kogg.ogg could not be played');
+    console.log('Using Web Audio API fallback for completion sound');
     
     try {
-        const fallbackAudio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLH7U9dF4KAAKW8Pz3o0xAA9Pr+/nlDsAFESj6/GaQgAaPJXn8Z5HAC86heLyoUsARTZ23/GiTwBWL2fa76NTAGYoWdbuo1YAYSNR0+2jWQBaH0jQ66RbAEkaPM/qpVwAMBc2zu2mXQAbFDXO7qdeAAoTNs/wqF0A/xI40fCpWwD2Ezna8KtZAOsUPd/wrlcA4hVD5fCwVQDaFkfr8LJTANEXSfDwtVEAxxdL9PC3TwC+GEz38LlMALYYTPrwukrArxhL+/C8SACoGEn78L1GAKEYRvvwv0QAmhhD+vDBQgCVGD358cNAAJEZOvfxxT4Ajxk39vHHPACNGjT28ck5AIsbMfbxyzYAiRwv9vHNNACHHSz18c8xAIYeKvTx0S8Ahh8n8/HTLACGICXy8dUqAIUhIvLx1ygAhCIf8fHZJgCDJBzx8dskAIInGfHx3SIAgiwW8PHgIAB/MRPw8uIdAHw2EfDy5BsAeDoO8PLmGQB1Pgzv8ugXAHFDCu/y6hQAbUgI7vLsEgBpTAbv8u4PAGVRBe7y8A0AYVcE7vLyDABeXAMt7/QNAFtiAS3v9Q0AU2cALe/2DgBObgAt7/cPAEhzAC7v+BAAQXgALu/5EQA7fQEu7/oSADWCAS/v+xMALoYCL+/8FAAoiwIw7/0VAB+PAjDv/hYAGZMDMO//FwASmAMx8AAZAAwcBQAKHQcACR4JAAgfCwAHIA0ABSEPAAQiEQADIxMAASQVAAAkFwAAJRkAACYaAAAmHAAAJh4AACcfAAAnIQAAJyMAACgkAAAoJgAAKSgAACkpAAApKwAAKSwAACouAAArLwAAKzEAACsyAAArNAAALDUAAC03AAAtOAAALToAAC07AAAtPQAALj4AAC5AADw3Kisp///i2c3Hwr+9vLq5trizsK2qqKWioJ6cmZeUkpCNi4iFgn+9uLWysPXy7urm4t3Y0s3HwLqzraWdlIyDemxcTz0vGA');
-        fallbackAudio.play().catch(e => console.log('Fallback audio play error:', e.message));
+        // Create a triumphant sound using Web Audio API (similar to the working beep)
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const currentTime = audioContext.currentTime;
+        
+        // Create a sequence of tones that sound like a "ta-da!"
+        
+        // First note (C)
+        createTone(audioContext, currentTime, 523.25, 0.3, 0.25);
+        
+        // Second note (E)
+        createTone(audioContext, currentTime + 0.25, 659.25, 0.3, 0.25);
+        
+        // Third note (G - higher and longer)
+        createTone(audioContext, currentTime + 0.5, 783.99, 0.4, 0.5);
+        
     } catch (e) {
-        console.log('Fallback sound not supported:', e.message);
+        console.log('Web Audio API fallback failed:', e.message);
     }
 }
+
+// Helper function to create a tone
+function createTone(audioContext, startTime, frequency, volume, duration) {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.value = frequency;
+    
+    // Shape the sound with an attack and release
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.05);
+    gainNode.gain.setValueAtTime(volume, startTime + duration - 0.05);
+    gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
+}
+
+// Pre-unlock audio on mobile devices
+document.addEventListener('click', function unlockAudio() {
+    // Try to unlock audio playback on user interaction
+    if (!window.audioContextUnlocked) {
+        window.audioContextUnlocked = true;
+        
+        try {
+            // Create a silent audio context
+            const unlockContext = new (window.AudioContext || window.webkitAudioContext)();
+            const silent = unlockContext.createBuffer(1, 1, 22050);
+            const source = unlockContext.createBufferSource();
+            source.buffer = silent;
+            source.connect(unlockContext.destination);
+            source.start(0);
+            
+            // Also try to pre-load the kogg audio
+            if (!window.koggAudio) {
+                window.koggAudio = new Audio('kogg.ogg');
+                window.koggAudio.volume = 0;  // Silent preload
+                window.koggAudio.play().catch(() => {
+                    console.log('Silent preload failed - will try again later');
+                });
+            }
+            
+            // Only need to do this once
+            document.removeEventListener('click', unlockAudio);
+        } catch (e) {
+            console.log('Audio unlock failed:', e);
+        }
+    }
+}, { once: false });
 
 // Beep sound for countdowns
 function createBeepSound() {
