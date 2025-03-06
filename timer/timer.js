@@ -643,16 +643,21 @@ function addSpecialConfetti() {
 
 
 // Update reveal circle
+// Update reveal circle with non-linear scaling for better visual effect
 function updateRevealCircle() {
     try {
-        // Calculate scale based on time remaining
+        // Calculate raw percentage remaining
         const percentageRemaining = totalSeconds / initialTotalSeconds;
-        revealCircle.style.transform = `scale(${percentageRemaining})`;
         
-        // Update color based on time remaining
+        // Apply a non-linear transformation to slow down initial shrinking
+        // The 0.7 power makes it shrink more slowly at the beginning
+        const scale = Math.pow(percentageRemaining, 0.7);
+        
+        // Apply the transformed scale
+        revealCircle.style.transform = `scale(${scale})`;
+        
+        // Update color based on time remaining - keep using linear percentage for this
         updateCircleColor(percentageRemaining);
-        
-        // Update message at key points
         updateProgressMessage(percentageRemaining);
     } catch (error) {
         console.log('Error updating reveal circle:', error.message);
