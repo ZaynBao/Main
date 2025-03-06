@@ -10,39 +10,57 @@
 
 <body>
     <div class="container">
-        <h1 class="timer-title">Timer</h1>
+        <!-- Navbar-style timer controls -->
+        <div class="timer-navbar">
+            <h1 class="timer-title">Timer</h1>
+            <div class="controls">
+                <div class="time-input-container">
+                    <label for="minutes">Set Minutes:</label>
+                    <div class="time-input-group">
+                        <div class="minute-controls">
+                            <button id="increase-btn" class="time-btn" aria-label="Increase minutes">+</button>
+                            <button id="decrease-btn" class="time-btn" aria-label="Decrease minutes">-</button>
+                        </div>
+                        <input type="number" id="minutes" min="1" max="60" value="2" aria-label="Set timer minutes">
+                    </div>
+                </div>
 
-<div class="controls">
-    <label for="minutes">Set Minutes:</label>
-    <input type="number" id="minutes" min="1" max="60" value="2" aria-label="Set timer minutes">
-    <div class="quick-set-buttons">
-        <button class="quick-set-btn" data-minutes="5">5 min</button>
-        <button class="quick-set-btn" data-minutes="10">10 min</button>
-        <button class="quick-set-btn" data-minutes="20">20 min</button>
-    </div>
-    <div class="button-wrapper">
-        <button id="start-btn" class="button start-btn" aria-label="Start timer">Start</button>
-        <button id="stop-btn" class="button stop-btn" style="display: none;" aria-label="Stop timer">Stop</button>
-        <button id="reset-btn" class="button reset-btn" style="display: none;" aria-label="Reset timer">Reset</button>
-        <button id="sound-btn" class="button sound-btn" aria-label="Toggle sound">🔊</button>
-    </div>
-</div>
+                <div class="quick-set-buttons">
+                    <button class="quick-set-btn" data-minutes="5">5 min</button>
+                    <button class="quick-set-btn" data-minutes="10">10 min</button>
+                    <button class="quick-set-btn" data-minutes="20">20 min</button>
+                </div>
 
-        <div class="timer-container">
-            <div id="loading-indicator" class="loading-indicator">
-                <div class="loading-spinner"></div>
+                <div class="button-wrapper">
+                    <button id="start-btn" class="button start-btn" aria-label="Start timer">Start</button>
+                    <button id="stop-btn" class="button stop-btn" style="display: none;"
+                        aria-label="Stop timer">Stop</button>
+                    <button id="reset-btn" class="button reset-btn" style="display: none;"
+                        aria-label="Reset timer">Reset</button>
+                    <button id="sound-btn" class="button sound-btn" aria-label="Toggle sound">🔊</button>
+                </div>
             </div>
-
-            <div class="car-container">
-                <img src="https://i5.walmartimages.com/seo/Disney-Pixar-Cars-Track-Talkers-Lightning-McQueen-Talking-Toy-Car-5-5-inch-Collectible-Play-Vehicle_39dc9e8e-46db-4c94-901b-169561d879a6.96d0b1baad1d973200ac2517b9d4411f.jpeg?odnHeight=768&odnWidth=768&odnBg=FFFFFF" alt="Car" class="car-image" id="car-image">
-            </div>
-
-            <div class="reveal-circle" id="reveal-circle"></div>
-
-            <div class="timer-display" id="timer-display" aria-live="polite">02:00</div>
         </div>
 
-        <div class="message" id="message" aria-live="polite">Set timer and press Start</div>
+        <!-- Main timer display area -->
+        <div class="main-content">
+            <div class="timer-container">
+                <div id="loading-indicator" class="loading-indicator">
+                    <div class="loading-spinner"></div>
+                </div>
+
+                <div class="car-container">
+                    <img src="https://i5.walmartimages.com/seo/Disney-Pixar-Cars-Track-Talkers-Lightning-McQueen-Talking-Toy-Car-5-5-inch-Collectible-Play-Vehicle_39dc9e8e-46db-4c94-901b-169561d879a6.96d0b1baad1d973200ac2517b9d4411f.jpeg?odnHeight=768&odnWidth=768&odnBg=FFFFFF"
+                        alt="Car" class="car-image" id="car-image">
+                </div>
+
+                <div class="reveal-circle" id="reveal-circle"></div>
+
+                <div class="timer-display" id="timer-display" aria-live="polite">02:00</div>
+            </div>
+
+            <div class="message" id="message" aria-live="polite">Set timer and press Start</div>
+        </div>
 
         <div class="confetti-container" id="confetti-container"></div>
 
