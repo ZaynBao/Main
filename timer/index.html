@@ -10,18 +10,16 @@
 
 <body>
     <div class="container">
-        <!-- Navbar-style timer controls -->
+        <!-- Side navbar timer controls -->
         <div class="timer-navbar">
             <h1 class="timer-title">Timer</h1>
             <div class="controls">
                 <div class="time-input-container">
-                    <label for="minutes">Set Minutes:</label>
+                    <label for="minutes">Set Minutes</label>
                     <div class="time-input-group">
-                        <div class="minute-controls">
-                            <button id="increase-btn" class="time-btn" aria-label="Increase minutes">+</button>
-                            <button id="decrease-btn" class="time-btn" aria-label="Decrease minutes">-</button>
-                        </div>
+                        <button id="decrease-btn" class="time-btn" aria-label="Decrease minutes">-</button>
                         <input type="number" id="minutes" min="1" max="60" value="2" aria-label="Set timer minutes">
+                        <button id="increase-btn" class="time-btn" aria-label="Increase minutes">+</button>
                     </div>
                 </div>
 
@@ -44,6 +42,8 @@
 
         <!-- Main timer display area -->
         <div class="main-content">
+            <button id="fullscreen-btn" class="button fullscreen-btn" aria-label="Toggle fullscreen">⛶</button>
+
             <div class="timer-container">
                 <div id="loading-indicator" class="loading-indicator">
                     <div class="loading-spinner"></div>
@@ -60,14 +60,12 @@
             </div>
 
             <div class="message" id="message" aria-live="polite">Set timer and press Start</div>
+
+            <div class="confetti-container" id="confetti-container"></div>
+
+            <!-- Screen keeper element -->
+            <div id="screen-keeper" class="screen-keeper"></div>
         </div>
-
-        <div class="confetti-container" id="confetti-container"></div>
-
-        <button id="fullscreen-btn" class="button fullscreen-btn" aria-label="Toggle fullscreen">⛶</button>
-
-        <!-- Screen keeper element -->
-        <div id="screen-keeper" class="screen-keeper"></div>
     </div>
 
     <script src="timer.js"></script>
