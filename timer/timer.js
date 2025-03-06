@@ -412,6 +412,7 @@ function resetTimer() {
 // Modify your timerComplete function to use the simpler approach
 // Add this to your timer.js file or replace the existing timerComplete function
 
+// Replace the timerComplete function to incorporate the improved audio handling
 function timerComplete() {
     try {
         clearInterval(timer);
@@ -450,10 +451,24 @@ function timerComplete() {
         resetBtn.style.display = 'inline-block';
         minutesInput.disabled = false;
         
-        // Play completion sound
+        // Create a "tap for sound" button that will definitely work on mobile
+        const soundButton = document.createElement('button');
+        soundButton.className = 'celebration-btn';
+        soundButton.id = 'play-sound-btn';
+        soundButton.textContent = '🔊 Tap for Sound';
+        soundButton.addEventListener('click', function() {
+            // This will definitely work because it's tied to a user interaction
+            playCompletionSound();
+            this.style.display = 'none';
+        });
+        
+        // Add it after the message
+        messageEl.parentNode.insertBefore(soundButton, messageEl.nextSibling);
+        
+        // Attempt to play sound automatically (might work on desktop, less likely on mobile)
         playCompletionSound();
         
-        // Attempt to play sound again after a short delay as backup
+        // Try again after a short delay as backup
         setTimeout(() => {
             playCompletionSound();
         }, 300);
@@ -479,6 +494,11 @@ function timerComplete() {
         playCompletionSound();
     }
 }
+
+// Initialize audio system for mobile
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAudioForMobile();
+});
 
 // Modify your resetTimer function to clean up the DONE message
 function resetTimer() {
@@ -789,22 +809,231 @@ function createBeepSound() {
 // Add this improved playCompletionSound function to fix the audio issues
 // Replace the existing playCompletionSound function with this version
 
+// Update the playCompletionSound function in timer.js
 function playCompletionSound() {
     if (!soundEnabled) return;
     
+    // Try multiple approaches for mobile compatibility
     try {
-        // Create multiple audio contexts and sounds to increase chances of playing
-        createCompletionSoundWithWebAudio();
+        // Method 1: Web Audio API with more aggressive fallbacks
+        playWebAudioCompletion();
         
-        // Also try to play a backup audio as fallback
+        // Method 2: Try HTML5 Audio as backup
         setTimeout(() => {
-            createCompletionSoundWithAudioElement();
+            playHTML5AudioCompletion();
         }, 100);
         
+        // Method 3: Ultimate fallback - use basic beep pattern
+        setTimeout(() => {
+            playFallbackBeeps();
+        }, 200);
     } catch (e) {
         console.log('Primary sound method failed:', e.message);
-        // Try alternate method
-        createCompletionSoundWithAudioElement();
+        // Try simpler approach
+        playFallbackBeeps();
+    }
+}
+
+// Method 1: Web Audio API approach with better mobile support
+function playWebAudioCompletion() {
+    try {
+        // Create context with user gesture simulation
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const currentTime = audioCtx.currentTime;
+        
+        // Android needs very simple audio to work reliably
+        // Single clear beep approach - works better on mobile
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 783.99; // G5 - clear and audible on mobile
+        
+        // Use simple envelope - mobile browsers prefer simple audio
+        gainNode.gain.setValueAtTime(0, currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.5, currentTime + 0.01);
+        gainNode.gain.setValueAtTime(0.5, currentTime + 0.3);
+        gainNode.gain.linearRampToValueAtTime(0, currentTime + 0.4);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        // Short, clear sound
+        oscillator.start(currentTime);
+        oscillator.stop(currentTime + 0.4);
+        
+        // Add a second beep after a pause (more likely to be heard on Android)
+        setTimeout(() => {
+            try {
+                const audioCtx2 = new (window.AudioContext || window.webkitAudioContext)();
+                const currentTime2 = audioCtx2.currentTime;
+                
+                const oscillator2 = audioCtx2.createOscillator();
+                const gainNode2 = audioCtx2.createGain();
+                
+                oscillator2.type = 'sine';
+                oscillator2.frequency.value = 987.77; // B5 - higher pitch for second beep
+                
+                gainNode2.gain.setValueAtTime(0, currentTime2);
+                gainNode2.gain.linearRampToValueAtTime(0.5, currentTime2 + 0.01);
+                gainNode2.gain.setValueAtTime(0.5, currentTime2 + 0.3);
+                gainNode2.gain.linearRampToValueAtTime(0, currentTime2 + 0.4);
+                
+                oscillator2.connect(gainNode2);
+                gainNode2.connect(audioCtx2.destination);
+                
+                oscillator2.start(currentTime2);
+                oscillator2.stop(currentTime2 + 0.4);
+            } catch (e) {
+                console.log('Second beep failed:', e.message);
+            }
+        }, 500);
+    } catch (e) {
+        console.log('Web Audio approach failed:', e.message);
+    }
+}
+
+// Method 2: HTML5 Audio with preloaded sounds - better for older Android
+function playHTML5AudioCompletion() {
+    try {
+        // Create and prepare audio element
+        const audio = new Audio();
+        
+        // This is an extremely simple, short sound that may work better on mobile
+        // Base64 encoded simple beep sound (very short)
+        audio.src = 'data:audio/mp3;base64,SUQzAwAAAAAAD1RJVDIAAAAGAAAzLjk4AP/7kAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAAcAAAAIAAAOsAA4ODg4ODg4ODg4ODhVVVVVVVVVVVVVVVVxcXFxcXFxcXFxcXFxjo6Ojo6Ojo6Ojo6OqqqqqqqqqqqqqqqqxsbGxsbGxsbGxsbG4+Pj4+Pj4+Pj4+Pj4+P///////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAADrAAc9MFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQZAAP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuOTguMlVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+        
+        // Important: preload the audio for mobile browsers
+        audio.preload = 'auto';
+        audio.load();
+        
+        // Try to force audio to be ready
+        audio.muted = false;
+        
+        // Try multiple play attempts with different timing
+        const playAttempt = () => {
+            const promise = audio.play();
+            if (promise !== undefined) {
+                promise.catch(e => {
+                    console.log('Audio play error:', e);
+                    // If failed, try one more time with user interaction simulation
+                    setTimeout(() => {
+                        audio.play().catch(e => console.log('Second play attempt failed:', e));
+                    }, 100);
+                });
+            }
+        };
+        
+        // Try the first play attempt
+        playAttempt();
+        
+        // Try a secondary backup audio (different format and encoding might work better on some devices)
+        setTimeout(() => {
+            try {
+                const backupAudio = new Audio();
+                backupAudio.src = 'data:audio/wav;base64,UklGRiIBAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0Yf4AAACA/v7+/f39+/v7+vr6/f39/////////v7+/Pz8+Pj49/f3+Pj4+vr6/Pz8/v7+//////7+/vv7+/j4+Pb29vb29vj4+Pv7+/39/f/////+/v78/Pz5+fn39/f39/f5+fn8/Pz+/v7//////v7+/Pz8+fn59/f39/f3+fn5/Pz8/v7+//////7+/vz8/Pn5+ff39/f39/n5+fz8/P7+/v/////+/v78/Pz5+fn39/f39/f5+fn8/Pz+/v7//////v7+/Pz8+fn59/f39/f3+fn5/Pz8/v7+//////7+/vz8/Pn5+ff39/f39/n5+fz8/P7+/v/////+/v78/Pz5+fn39/f39/f5+fn8/Pz+/v4=';
+                backupAudio.preload = 'auto';
+                backupAudio.load();
+                backupAudio.play().catch(e => console.log('Backup audio failed:', e));
+            } catch (e) {
+                console.log('Backup audio error:', e);
+            }
+        }, 300);
+        
+    } catch (audioError) {
+        console.log('HTML5 Audio not supported:', audioError);
+    }
+}
+
+// Method 3: Fallback to very simple beep series - works on most restrictive browsers
+function playFallbackBeeps() {
+    try {
+        // Use multiple simple beeps in sequence - more likely to work on mobile
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                try {
+                    const simpleCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = simpleCtx.createOscillator();
+                    const gainNode = simpleCtx.createGain();
+                    
+                    // Very simple sine wave - most likely to work across browsers
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = 440 + (i * 220); // Ascending tones
+                    gainNode.gain.value = 0.1;
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(simpleCtx.destination);
+                    
+                    oscillator.start();
+                    
+                    // Keep beeps very short
+                    setTimeout(() => {
+                        oscillator.stop();
+                        try {
+                            simpleCtx.close();
+                        } catch (e) {}
+                    }, 200);
+                } catch (e) {
+                    console.log('Fallback beep ' + i + ' failed:', e);
+                }
+            }, i * 300);
+        }
+    } catch (e) {
+        console.log('Even fallback beeps failed:', e);
+        
+        // Last resort - try to vibrate the device
+        if ('vibrate' in navigator) {
+            try {
+                navigator.vibrate([200, 100, 200]);
+            } catch (e) {}
+        }
+    }
+}
+
+// Add this new function to init to ensure audio works better on mobile
+function initializeAudioForMobile() {
+    // Try to initialize audio context early
+    try {
+        window._audioContextCache = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // On first user interaction, resume audio context to help with mobile browsers
+        const resumeAudioContext = () => {
+            if (window._audioContextCache && window._audioContextCache.state !== 'running') {
+                window._audioContextCache.resume().then(() => {
+                    console.log('Audio context resumed successfully');
+                }).catch(e => {
+                    console.log('Failed to resume audio context:', e);
+                });
+            }
+        };
+        
+        // Listen for user interactions to initialize audio
+        ['click', 'touchstart', 'touchend'].forEach(eventType => {
+            document.addEventListener(eventType, resumeAudioContext, { once: true });
+        });
+        
+        // Try to enable audio playback on mobile browsers
+        document.addEventListener('click', () => {
+            // Create and play a silent sound to enable audio
+            const silentContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = silentContext.createOscillator();
+            const gainNode = silentContext.createGain();
+            
+            gainNode.gain.value = 0.001; // Nearly silent
+            oscillator.connect(gainNode);
+            gainNode.connect(silentContext.destination);
+            
+            oscillator.start();
+            setTimeout(() => {
+                oscillator.stop();
+                try {
+                    silentContext.close();
+                } catch (e) {}
+            }, 1);
+        }, { once: true });
+        
+    } catch (e) {
+        console.log('Audio initialization skipped:', e);
     }
 }
 
