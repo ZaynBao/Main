@@ -426,50 +426,34 @@ function resetTimer() {
 
 // Play completion sound
 // Prioritize playing kogg.ogg with robust fallback
+// Most compatible approach - MP3 format with simple implementation
 function playCompletionSound() {
     if (!soundEnabled) return;
     
-    console.log('Attempting to play kogg.ogg...');
-    
-    // Try to play the kogg.ogg file first
-    let koggAudio = new Audio('kogg.ogg');
-    
-    // Set options for best compatibility
-    koggAudio.preload = 'auto';
-    koggAudio.volume = 0.7;
-    
-    // Set timeout to handle cases where the file might be slow to load
-    let soundFallbackTimer = setTimeout(() => {
-        console.log('kogg.ogg loading timeout - using fallback sound');
-        createWebAudioFallbackSound();
-    }, 1000); // 1 second timeout
-    
-    // On successful playback, clear the fallback timer
-    koggAudio.addEventListener('playing', function() {
-        console.log('kogg.ogg playing successfully');
-        clearTimeout(soundFallbackTimer);
-    });
-    
-    // On error, use the fallback
-    koggAudio.addEventListener('error', function(e) {
-        console.log('kogg.ogg error:', e);
-        clearTimeout(soundFallbackTimer);
-        createWebAudioFallbackSound();
-    });
-    
-    // Try to play the audio file
-    const playPromise = koggAudio.play();
-    
-    // Handle promise-based play API
-    if (playPromise !== undefined) {
-        playPromise.catch(error => {
-            console.log('kogg.ogg play error:', error);
-            clearTimeout(soundFallbackTimer);
-            createWebAudioFallbackSound();
+    try {
+        // For maximum compatibility, MP3 format works best on mobile devices
+        // You should convert your kogg.ogg to kogg.mp3
+        const audio = new Audio('Koggmp3.mp3');
+        
+        // Use high volume to ensure it's heard
+        audio.volume = 1.0;
+        
+        // Basic error handling - fall back to simple beep if MP3 fails
+        audio.onerror = function() {
+            console.log('MP3 playback failed, using fallback beep');
+            createSimpleBeep();
+        };
+        
+        // Play it
+        audio.play().catch(error => {
+            console.log('Audio play error:', error);
+            createSimpleBeep();
         });
+    } catch (e) {
+        console.log('Audio creation error:', e);
+        createSimpleBeep();
     }
 }
-
 
 // Fallback that uses the Web Audio API (similar to the beep sound)
 function createFallbackCompletionSound() {
