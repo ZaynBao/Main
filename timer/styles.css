@@ -14,10 +14,9 @@ body, html {
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr;
     width: 100%;
     height: 100vh;
     padding: 0;
@@ -25,119 +24,116 @@ body, html {
 }
 
 /* ===== NAVBAR & CONTROLS ===== */
+/* Transform the navbar into a sidebar */
 .timer-navbar {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 10px 0;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    position: relative;
+    justify-content: flex-start;
+    background-color: rgba(255, 255, 255, 0.85);
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px 15px;
+    height: 100%;
     z-index: 20;
+    min-width: 200px;
 }
 
+/* Make the title smaller and less prominent */
 .timer-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
     color: #333;
-    font-size: 1.8rem;
-    margin-bottom: 5px;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
+/* Reorganize controls for vertical layout */
 .controls {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    padding: 5px 15px;
+    flex-direction: column;
+    gap: 20px;
     width: 100%;
-    max-width: 500px;
+    max-width: 180px;
 }
 
 /* Time Input Container */
 .time-input-container {
     display: flex;
+    flex-direction: column;
     align-items: center;
     background-color: white;
-    border-radius: 20px;
-    padding: 3px;
+    border-radius: 15px;
+    padding: 10px;
     border: 2px solid #ff7e5f;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 100%;
 }
 
 .time-input-container label {
     font-size: 0.9rem;
-    color: #333;
-    margin-left: 8px;
-    white-space: nowrap;
+    margin-bottom: 8px;
 }
 
 .time-input-group {
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 5px;
 }
 
-/* Minute Controls */
-.minute-controls {
-    display: flex;
-    flex-direction: column;
-    margin-right: 8px;
-}
-
+/* Time Button Styles */
 .time-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.5rem;
+    font-weight: bold;
     background: linear-gradient(45deg, #ff7e5f, #feb47b);
     color: white;
     border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    font-weight: bold;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    margin: 3px;
     box-shadow: 0 3px 6px rgba(0,0,0,0.2);
     user-select: none;
-    line-height: 1;
     transition: transform 0.1s, background 0.2s;
 }
 
 .time-btn:hover {
-    transform: scale(1.1);
+    transform: translateY(-2px);
     filter: brightness(1.1);
 }
 
 .time-btn:active {
-    transform: scale(0.9);
+    transform: translateY(1px);
 }
 
 /* Minutes Input */
 input#minutes {
-    width: 50px;
+    width: 60px;
     height: 40px;
     text-align: center;
     font-size: 1.4rem;
     font-weight: bold;
     border: 2px solid #ff7e5f;
-    border-radius: 12px;
+    border-radius: 8px;
     background: white;
     color: #333;
-    padding: 0;
-    margin: 0 8px;
+    margin: 0 10px;
+    padding: 0 5px;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* Quick Set Buttons */
 .quick-set-buttons {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
 }
 
 .quick-set-btn {
+    width: 100%;
     padding: 8px 16px;
     border: none;
     border-radius: 25px;
@@ -150,6 +146,7 @@ input#minutes {
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     white-space: nowrap;
     transform-origin: center;
+    text-align: center;
 }
 
 .quick-set-btn:hover {
@@ -165,8 +162,9 @@ input#minutes {
 /* Button Styles */
 .button-wrapper {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
 }
 
 .button {
@@ -182,6 +180,7 @@ input#minutes {
 }
 
 .start-btn, .stop-btn, .reset-btn {
+    width: 100%;
     padding: 10px 20px;
     font-size: 1.2rem;
     font-weight: bold;
@@ -232,17 +231,35 @@ input#minutes {
     justify-content: center;
     flex-grow: 1;
     width: 100%;
+    height: 100%;
     position: relative;
     padding: 20px;
+}
+
+/* Move fullscreen button to top right */
+.fullscreen-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    min-width: auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #2c3e50, #34495e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    z-index: 30;
 }
 
 /* Timer Container */
 .timer-container {
     position: relative;
-    width: min(80vw, 80vh);
-    height: min(80vw, 80vh);
-    max-width: 600px;
-    max-height: 600px;
+    width: min(85vw, 85vh);
+    height: min(85vw, 85vh);
+    max-width: 700px;
+    max-height: 700px;
     margin: 0 auto;
     animation: float 6s ease-in-out infinite;
 }
@@ -442,22 +459,6 @@ input#minutes {
 }
 
 /* ===== UTILITY CLASSES ===== */
-.fullscreen-btn {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    min-width: auto;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(45deg, #2c3e50, #34495e);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    z-index: 30;
-}
-
 .status-footer {
     width: 100%;
     padding: 15px;
@@ -535,82 +536,195 @@ input#minutes {
 
 /* ===== RESPONSIVE STYLES ===== */
 @media (max-width: 768px) {
+    /* Switch to top navigation on small screens */
+    .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+    
+    .timer-navbar {
+        width: 100%;
+        min-width: unset;
+        height: auto;
+        flex-direction: row;
+        padding: 10px;
+    }
+    
+    .timer-title {
+        font-size: 1.3rem;
+        margin-bottom: 0;
+        margin-right: 15px;
+    }
+    
     .controls {
+        flex-direction: row;
+        max-width: unset;
         flex-wrap: wrap;
         gap: 10px;
         justify-content: center;
     }
     
-    .timer-display {
-        font-size: 4rem;
-    }
-    
-    .message {
-        font-size: 1.2rem;
-        padding: 8px 15px;
+    .time-input-container {
+        flex-direction: row;
+        width: auto;
     }
     
     .time-input-container label {
+        margin-bottom: 0;
+        margin-right: 8px;
+    }
+    
+    .quick-set-buttons {
+        flex-direction: row;
+        width: auto;
+    }
+    
+    .button-wrapper {
+        flex-direction: row;
+        width: auto;
+    }
+    
+    .start-btn, .stop-btn, .reset-btn, .quick-set-btn {
+        width: auto;
+    }
+    
+    /* Adjust timer container for smaller screens */
+    .timer-container {
+        width: min(90vw, 60vh);
+        height: min(90vw, 60vh);
+    }
+}
+
+/* Extreme small screens */
+@media (max-width: 480px) {
+    .timer-navbar {
+        padding: 5px;
+    }
+    
+    .controls {
+        gap: 5px;
+    }
+    
+    .timer-title {
         display: none;
     }
     
     .time-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 1.6rem;
+        width: 32px;
+        height: 32px;
+        font-size: 1.3rem;
     }
     
     input#minutes {
         width: 50px;
-        height: 45px;
-        font-size: 1.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .quick-set-buttons {
-        gap: 5px;
+        font-size: 1.3rem;
+        margin: 0 5px;
     }
     
     .quick-set-btn {
-        padding: 10px 15px;
-        font-size: 1.2rem;
-    }
-    
-    .button {
         padding: 6px 12px;
         font-size: 0.9rem;
     }
     
-    .timer-display {
-        font-size: 2.5rem;
-    }
-    
-    .time-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.8rem;
-        margin: 4px;
-    }
-    
     .start-btn, .stop-btn, .reset-btn {
-        padding: 12px 20px;
-        font-size: 1.3rem;
+        padding: 8px 15px;
+        font-size: 1rem;
     }
 }
 
-@media (max-height: 600px) {
+/* Better responsive handling for tablets in landscape mode */
+@media (max-width: 1024px) and (orientation: landscape) {
+    /* Make navbar more compact */
     .timer-navbar {
-        padding: 5px 0;
+        padding: 5px 10px;
+        min-width: 180px;
     }
     
     .timer-title {
-        font-size: 1.5rem;
-        margin-bottom: 2px;
+        font-size: 1.4rem;
+        margin-bottom: 10px;
     }
     
+    /* Compress the controls to fit better */
+    .controls {
+        gap: 10px;
+    }
+    
+    /* Reduce the size of the timer container */
     .timer-container {
-        width: min(60vw, 60vh);
-        height: min(60vw, 60vh);
+        width: min(70vw, 70vh);
+        height: min(70vw, 70vh);
+    }
+    
+    /* Adjust message position */
+    .message {
+        margin-top: 15px;
+        font-size: 1.2rem;
+        padding: 8px 15px;
+    }
+}
+
+/* Even smaller screens in landscape (older tablets, phones) */
+@media (max-width: 768px) and (max-height: 480px) and (orientation: landscape) {
+    /* Switch to horizontal layout for small landscape */
+    .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+    
+    .timer-navbar {
+        width: 100%;
+        min-width: unset;
+        height: auto;
+        flex-direction: row;
+        padding: 5px 10px;
+    }
+    
+    /* Hide title to save space */
+    .timer-title {
+        display: none;
+    }
+    
+    /* Stack controls for ultra-wide but short screens */
+    .controls {
+        flex-direction: row;
+        max-width: unset;
+        flex-wrap: wrap;
+        gap: 5px;
+        justify-content: center;
+    }
+    
+    /* Compress the timer display text */
+    .timer-display {
+        font-size: 3.5rem;
+        padding: 8px 20px;
+        min-width: 160px;
+    }
+    
+    /* Further reduce timer container for very small heights */
+    .timer-container {
+        width: min(50vw, 50vh);
+        height: min(50vw, 50vh);
+        animation: none;
+    }
+    
+    /* Make buttons very compact */
+    .button {
+        padding: 5px 10px;
+        font-size: 0.9rem;
+    }
+    
+    .start-btn, .stop-btn, .reset-btn {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        min-width: auto;
+    }
+    
+    /* Position fullscreen button better */
+    .fullscreen-btn {
+        top: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
     }
 }
