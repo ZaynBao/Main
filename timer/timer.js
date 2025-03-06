@@ -412,6 +412,7 @@ function resetTimer() {
 // Modify your timerComplete function to use the simpler approach
 // Add this to your timer.js file or replace the existing timerComplete function
 
+// Update timerComplete function to not try to play the sound twice
 function timerComplete() {
     try {
         clearInterval(timer);
@@ -450,13 +451,8 @@ function timerComplete() {
         resetBtn.style.display = 'inline-block';
         minutesInput.disabled = false;
         
-        // Play completion sound
+        // Play completion sound - only once!
         playCompletionSound();
-        
-        // Attempt to play sound again after a short delay as backup
-        setTimeout(() => {
-            playCompletionSound();
-        }, 300);
         
         // Vibrate the device if supported
         if ('vibrate' in navigator) {
@@ -474,9 +470,6 @@ function timerComplete() {
     } catch (error) {
         console.log('Error completing timer:', error.message);
         showError('Timer finished but had an error');
-        
-        // Emergency attempt to play sound
-        playCompletionSound();
     }
 }
 
@@ -786,27 +779,115 @@ function createBeepSound() {
 }
 
 // Play completion sound
-// Add this improved playCompletionSound function to fix the audio issues
-// Replace the existing playCompletionSound function with this version
+
+
+// Update the playCompletionSound function to use only kogg.ogg
 
 function playCompletionSound() {
     if (!soundEnabled) return;
     
     try {
-        // Create multiple audio contexts and sounds to increase chances of playing
-        createCompletionSoundWithWebAudio();
+        // Create an Audio object and load the kogg.ogg file
+        const audio = new Audio('timer/kogg.ogg');
         
-        // Also try to play a backup audio as fallback
-        setTimeout(() => {
-            createCompletionSoundWithAudioElement();
-        }, 100);
+        // Set volume
+        audio.volume = 0.7;
         
-    } catch (e) {
-        console.log('Primary sound method failed:', e.message);
-        // Try alternate method
-        createCompletionSoundWithAudioElement();
+        // Add event listeners to handle possible errors
+        audio.addEventListener('error', function(e) {
+            console.log('Audio error:', e);
+            // Only attempt fallback if there's an error with the file
+            createFallbackCompletionSound();
+        });
+        
+        // Preload the audio
+        audio.load();
+        
+        // Play the audio with multiple attempts in case of failure
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log('Audio play error, retrying:', error);
+                
+                // Try again after a short delay
+                setTimeout(() => {
+                    audio.play().catch(e => {
+                        console.log('Second play attempt failed:', e);
+                        // Only use fallback if we can't play the audio file
+                        createFallbackCompletionSound();
+                    });
+                }, 100);
+            });
+        }
+    } catch (audioError) {
+        console.log('Audio playback error:', audioError.message);
+        // Only use fallback as a last resort
+        createFallbackCompletionSound();
     }
 }
+
+
+
+// This is only for fallback if kogg.ogg can't be played
+function createFallbackCompletionSound() {
+    console.log('Using fallback sound because kogg.ogg could not be played');
+    
+    try {
+        const fallbackAudio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLH7U9dF4KAAKW8Pz3o0xAA9Pr+/nlDsAFESj6/GaQgAaPJXn8Z5HAC86heLyoUsARTZ23/GiTwBWL2fa76NTAGYoWdbuo1YAYSNR0+2jWQBaH0jQ66RbAEkaPM/qpVwAMBc2zu2mXQAbFDXO7qdeAAoTNs/wqF0A/xI40fCpWwD2Ezna8KtZAOsUPd/wrlcA4hVD5fCwVQDaFkfr8LJTANEXSfDwtVEAxxdL9PC3TwC+GEz38LlMALYYTPrwukrArxhL+/C8SACoGEn78L1GAKEYRvvwv0QAmhhD+vDBQgCVGD358cNAAJEZOvfxxT4Ajxk39vHHPACNGjT28ck5AIsbMfbxyzYAiRwv9vHNNACHHSz18c8xAIYeKvTx0S8Ahh8n8/HTLACGICXy8dUqAIUhIvLx1ygAhCIf8fHZJgCDJBzx8dskAIInGfHx3SIAgiwW8PHgIAB/MRPw8uIdAHw2EfDy5BsAeDoO8PLmGQB1Pgzv8ugXAHFDCu/y6hQAbUgI7vLsEgBpTAbv8u4PAGVRBe7y8A0AYVcE7vLyDABeXAMt7/QNAFtiAS3v9Q0AU2cALe/2DgBObgAt7/cPAEhzAC7v+BAAQXgALu/5EQA7fQEu7/oSADWCAS/v+xMALoYCL+/8FAAoiwIw7/0VAB+PAjDv/hYAGZMDMO//FwASmAMx8AAZAAwcBQAKHQcACR4JAAgfCwAHIA0ABSEPAAQiEQADIxMAASQVAAAkFwAAJRkAACYaAAAmHAAAJh4AACcfAAAnIQAAJyMAACgkAAAoJgAAKSgAACkpAAApKwAAKSwAACouAAArLwAAKzEAACsyAAArNAAALDUAAC03AAAtOAAALToAAC07AAAtPQAALj4AAC5AADw3Kisp///i2c3Hwr+9vLq5trizsK2qqKWioJ6cmZeUkpCNi4iFgn+9uLWysPXy7urm4t3Y0s3HwLqzraWdlIyDemxcTz0vGA');
+        fallbackAudio.play().catch(e => console.log('Fallback audio play error:', e.message));
+    } catch (e) {
+        console.log('Fallback sound not supported:', e.message);
+    }
+}
+
+// We'll also need to update the createBeepSound to use audio files
+function createBeepSound() {
+    if (!soundEnabled) return;
+    
+    try {
+        // Create an Audio object with a short beep sound
+        const beepAudio = new Audio('timer/beep.ogg');
+        // If you don't have a beep.ogg file, you can keep the existing method
+        // or use a base64 audio like the fallback above
+        
+        beepAudio.volume = 0.3;
+        beepAudio.play().catch(error => {
+            console.log('Beep audio play error:', error);
+            // Use fallback beep
+            createFallbackBeepSound();
+        });
+    } catch (e) {
+        console.log('Beep sound not supported:', e.message);
+        createFallbackBeepSound();
+    }
+}
+
+// Fallback beep sound if needed
+function createFallbackBeepSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 800; // Hz
+        gainNode.gain.value = 0.2; // Volume
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.start();
+        
+        // Short beep duration
+        setTimeout(() => {
+            oscillator.stop();
+        }, 200);
+    } catch (e) {
+        console.log('Fallback beep sound not supported:', e.message);
+    }
+}
+
 
 // Web Audio API method (primary)
 function createCompletionSoundWithWebAudio() {
