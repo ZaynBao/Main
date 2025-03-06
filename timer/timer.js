@@ -425,58 +425,51 @@ function resetTimer() {
 }
 
 // Play completion sound
-// Improved playCompletionSound function for better mobile compatibility
-// Replace with this simpler, guaranteed-to-work solution
-
-// For the completion sound, use Web Audio API directly like the beep sound
+// Prioritize playing kogg.ogg with robust fallback
 function playCompletionSound() {
     if (!soundEnabled) return;
     
-    try {
-        // Create audio context
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Generate a sequence of tones for "ta-da" sound
-        const now = audioContext.currentTime;
-        
-        // First tone (C)
-        createCompletionTone(audioContext, now, 523.25, 0.3, 0.15);
-        
-        // Second tone (E)
-        createCompletionTone(audioContext, now + 0.15, 659.25, 0.3, 0.15);
-        
-        // Third tone (G)
-        createCompletionTone(audioContext, now + 0.3, 783.99, 0.3, 0.15);
-        
-        // Final tone (C higher octave - triumphant ending)
-        createCompletionTone(audioContext, now + 0.45, 1046.50, 0.4, 0.3);
-        
-        console.log('Playing completion sound with Web Audio API');
-    } catch (e) {
-        console.log('Web Audio API not supported:', e.message);
+    console.log('Attempting to play kogg.ogg...');
+    
+    // Try to play the kogg.ogg file first
+    let koggAudio = new Audio('kogg.ogg');
+    
+    // Set options for best compatibility
+    koggAudio.preload = 'auto';
+    koggAudio.volume = 0.7;
+    
+    // Set timeout to handle cases where the file might be slow to load
+    let soundFallbackTimer = setTimeout(() => {
+        console.log('kogg.ogg loading timeout - using fallback sound');
+        createWebAudioFallbackSound();
+    }, 1000); // 1 second timeout
+    
+    // On successful playback, clear the fallback timer
+    koggAudio.addEventListener('playing', function() {
+        console.log('kogg.ogg playing successfully');
+        clearTimeout(soundFallbackTimer);
+    });
+    
+    // On error, use the fallback
+    koggAudio.addEventListener('error', function(e) {
+        console.log('kogg.ogg error:', e);
+        clearTimeout(soundFallbackTimer);
+        createWebAudioFallbackSound();
+    });
+    
+    // Try to play the audio file
+    const playPromise = koggAudio.play();
+    
+    // Handle promise-based play API
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log('kogg.ogg play error:', error);
+            clearTimeout(soundFallbackTimer);
+            createWebAudioFallbackSound();
+        });
     }
 }
 
-// Helper function to create a tone
-function createCompletionTone(audioContext, startTime, frequency, volume, duration) {
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.type = 'sine';
-    oscillator.frequency.value = frequency;
-    
-    // Shape the sound with an attack and release
-    gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.05);
-    gainNode.gain.setValueAtTime(volume, startTime + duration - 0.05);
-    gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.start(startTime);
-    oscillator.stop(startTime + duration);
-}
 
 // Fallback that uses the Web Audio API (similar to the beep sound)
 function createFallbackCompletionSound() {
