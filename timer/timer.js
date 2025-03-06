@@ -406,6 +406,12 @@ function resetTimer() {
 }
 
 // Timer complete function
+// Add this code to enhance the timer completion experience
+// Add to the timerComplete function in your existing timer.js
+
+// Modify your timerComplete function to use the simpler approach
+// Add this to your timer.js file or replace the existing timerComplete function
+
 function timerComplete() {
     try {
         clearInterval(timer);
@@ -414,19 +420,31 @@ function timerComplete() {
         // Disable screen keeping
         stopScreenKeeping();
         
-        // Visual effects for timer completion
-        timerDisplay.textContent = 'DONE!';
-        timerDisplay.classList.add('pulse');
-        messageEl.textContent = 'Time is up!';
+        // Hide the timer display
+        timerDisplay.style.display = 'none';
         
-        // Ensure car is fully revealed
+        // Create and display a simple DONE message element
+        const doneMessage = document.createElement('div');
+        doneMessage.className = 'done-message';
+        doneMessage.textContent = 'DONE!';
+        doneMessage.id = 'done-message';
+        
+        // Add to the timer container
+        document.querySelector('.timer-container').appendChild(doneMessage);
+        
+        // Fully reveal the car image
+        revealCircle.style.transition = 'transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1)';
         revealCircle.style.transform = 'scale(0)';
         
-        // Confetti effect
+        // Update completion message at the bottom
+        messageEl.textContent = '🎉 Time is up! 🎉';
+        messageEl.className = 'message completion-message';
+        
+        // Show confetti
         confettiContainer.style.display = 'block';
         createConfetti();
         
-        // Reset buttons
+        // Reset buttons state
         startBtn.style.display = 'none';
         stopBtn.style.display = 'none';
         resetBtn.style.display = 'inline-block';
@@ -435,16 +453,193 @@ function timerComplete() {
         // Play completion sound
         playCompletionSound();
         
+        // Attempt to play sound again after a short delay as backup
+        setTimeout(() => {
+            playCompletionSound();
+        }, 300);
+        
+        // Vibrate the device if supported
+        if ('vibrate' in navigator) {
+            try {
+                navigator.vibrate([300, 100, 300]);
+            } catch (e) {
+                console.log('Vibration failed:', e.message);
+            }
+        }
+        
         // Save state
         if (isLocalStorageAvailable()) {
-            localStorage.removeItem('timerState'); // Clear saved state since timer is complete
+            localStorage.removeItem('timerState'); // Clear saved state
         }
     } catch (error) {
         console.log('Error completing timer:', error.message);
         showError('Timer finished but had an error');
+        
+        // Emergency attempt to play sound
+        playCompletionSound();
     }
 }
 
+// Modify your resetTimer function to clean up the DONE message
+function resetTimer() {
+    try {
+        clearInterval(timer);
+        isRunning = false;
+        
+        // Disable screen keeping
+        stopScreenKeeping();
+        
+        // Remove the DONE message if it exists
+        const doneMessage = document.getElementById('done-message');
+        if (doneMessage) {
+            doneMessage.remove();
+        }
+        
+        // Show the timer display again
+        timerDisplay.style.display = 'block';
+        
+        // Reset visuals
+        revealCircle.style.transform = 'scale(1)';
+        revealCircle.style.backgroundColor = '#00b09b';
+        timerDisplay.classList.remove('pulse', 'final-countdown');
+        
+        // Reset confetti
+        confettiContainer.style.display = 'none';
+        confettiContainer.innerHTML = '';
+        
+        // Reset message
+        messageEl.textContent = 'Set timer and press Start';
+        messageEl.className = 'message';
+        
+        // Reset buttons
+        startBtn.style.display = 'inline-block';
+        stopBtn.style.display = 'none';
+        resetBtn.style.display = 'none';
+        stopBtn.textContent = 'Stop';
+        minutesInput.disabled = false;
+        
+        // Reset timer value
+        updateDisplayFromInput();
+        
+        // Save state (reset state)
+        saveTimerState();
+    } catch (error) {
+        console.log('Error resetting timer:', error.message);
+        showError('Could not reset timer');
+    }
+}
+
+// Enhanced confetti with more colors, sizes, and shapes for kids
+function createEnhancedConfetti() {
+    try {
+        confettiContainer.innerHTML = '';
+        const confettiCount = 200; // More confetti!
+        
+        // Bright, kid-friendly colors
+        const colors = [
+            '#ff0000', '#00ff00', '#0000ff', '#ffff00', 
+            '#ff00ff', '#00ffff', '#ff6b6b', '#2ecc71', 
+            '#3498db', '#f1c40f', '#e67e22', '#e74c3c',
+            '#9b59b6', '#1abc9c', '#fa8072'
+        ];
+        
+        for (let i = 0; i < confettiCount; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            
+            // Random size - bigger range for more fun
+            const size = Math.random() * 20 + 5;
+            confetti.style.width = `${size}px`;
+            confetti.style.height = `${size}px`;
+            
+            // Random position
+            confetti.style.left = `${Math.random() * 100}%`;
+            
+            // Random color
+            const colorIndex = Math.floor(Math.random() * colors.length);
+            confetti.style.backgroundColor = colors[colorIndex];
+            
+            // Random shape - more shapes for variety
+            const shapes = [
+                '', // square
+                'clip-path: polygon(50% 0%, 0% 100%, 100% 100%)', // triangle
+                'clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)', // diamond
+                'clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)', // hexagon
+                'border-radius: 50%' // circle
+            ];
+            const shapeIndex = Math.floor(Math.random() * shapes.length);
+            confetti.style.cssText += shapes[shapeIndex];
+            
+            // Random delay
+            const delay = Math.random() * 4;
+            confetti.style.animationDelay = `${delay}s`;
+            
+            // Random duration - slower for more enjoyable effect
+            const duration = Math.random() * 4 + 3;
+            confetti.style.animationDuration = `${duration}s`;
+            
+            // Random horizontal movement with wobble
+            const horizontalMovement = (Math.random() - 0.5) * 300;
+            
+            // Use more advanced animation
+            confetti.animate([
+                { top: '-10px', transform: 'translateX(0) rotate(0)' },
+                { top: '50%', transform: `translateX(${horizontalMovement * 0.5}px) rotate(${180 + Math.random() * 180}deg)` },
+                { top: '100%', transform: `translateX(${horizontalMovement}px) rotate(${360 + Math.random() * 360}deg)` }
+            ], {
+                duration: duration * 1000,
+                easing: 'cubic-bezier(0.21, 0.53, 0.29, 0.8)',
+                fill: 'forwards'
+            });
+            
+            confettiContainer.appendChild(confetti);
+        }
+        
+        // Add some special confetti elements like stars and emoji
+        addSpecialConfetti();
+        
+    } catch (error) {
+        console.log('Error creating confetti:', error.message);
+    }
+}
+
+// Add special confetti like stars and emoji
+function addSpecialConfetti() {
+    try {
+        // Add some emoji as special confetti (kids love emoji!)
+        const emojis = ['🎉', '🎈', '🎊', '⭐', '✨', '🚗', '🏎️', '🌟', '🎯', '🎮'];
+        const emojiCount = 20;
+        
+        for (let i = 0; i < emojiCount; i++) {
+            const emojiElement = document.createElement('div');
+            emojiElement.classList.add('confetti');
+            emojiElement.style.backgroundColor = 'transparent';
+            emojiElement.style.fontSize = `${Math.random() * 20 + 20}px`;
+            emojiElement.style.width = 'auto';
+            emojiElement.style.height = 'auto';
+            emojiElement.style.left = `${Math.random() * 100}%`;
+            emojiElement.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            const delay = Math.random() * 3;
+            const duration = Math.random() * 4 + 4;
+            const horizontalMovement = (Math.random() - 0.5) * 200;
+            
+            emojiElement.animate([
+                { top: '-40px', transform: 'translateX(0) rotate(0)', opacity: 1 },
+                { top: '50%', transform: `translateX(${horizontalMovement * 0.5}px) rotate(${Math.random() * 180}deg)`, opacity: 1 },
+                { top: '100%', transform: `translateX(${horizontalMovement}px) rotate(${Math.random() * 360}deg)`, opacity: 0.7 }
+            ], {
+                duration: duration * 1000,
+                easing: 'cubic-bezier(0.21, 0.53, 0.29, 0.8)',
+                fill: 'forwards'
+            });
+            
+            confettiContainer.appendChild(emojiElement);
+        }
+    } catch (error) {
+        console.log('Error adding special confetti:', error.message);
+    }
+}
 
 
 // Update reveal circle
@@ -586,58 +781,181 @@ function createBeepSound() {
 }
 
 // Play completion sound
+// Add this improved playCompletionSound function to fix the audio issues
+// Replace the existing playCompletionSound function with this version
+
 function playCompletionSound() {
     if (!soundEnabled) return;
     
     try {
-        // Create a longer, more celebratory sound
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Create multiple audio contexts and sounds to increase chances of playing
+        createCompletionSoundWithWebAudio();
         
-        // First part - rising tone
-        const oscillator1 = audioContext.createOscillator();
-        const gainNode1 = audioContext.createGain();
+        // Also try to play a backup audio as fallback
+        setTimeout(() => {
+            createCompletionSoundWithAudioElement();
+        }, 100);
         
-        oscillator1.type = 'sine';
-        oscillator1.frequency.setValueAtTime(400, audioContext.currentTime);
-        oscillator1.frequency.linearRampToValueAtTime(800, audioContext.currentTime + 0.2);
-        
-        gainNode1.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode1.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-        
-        oscillator1.connect(gainNode1);
-        gainNode1.connect(audioContext.destination);
-        
-// Second part - higher tone
-        const oscillator2 = audioContext.createOscillator();
-        const gainNode2 = audioContext.createGain();
-        
-        oscillator2.type = 'sine';
-        oscillator2.frequency.setValueAtTime(900, audioContext.currentTime + 0.3);
-        oscillator2.frequency.linearRampToValueAtTime(1200, audioContext.currentTime + 0.5);
-        
-        gainNode2.gain.setValueAtTime(0.01, audioContext.currentTime + 0.3);
-        gainNode2.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.4);
-        gainNode2.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
-        
-        oscillator2.connect(gainNode2);
-        gainNode2.connect(audioContext.destination);
-        
-        // Start and stop both oscillators
-        oscillator1.start(audioContext.currentTime);
-        oscillator1.stop(audioContext.currentTime + 0.3);
-        
-        oscillator2.start(audioContext.currentTime + 0.3);
-        oscillator2.stop(audioContext.currentTime + 0.6);
     } catch (e) {
-        console.log('Completion sound not supported:', e.message);
+        console.log('Primary sound method failed:', e.message);
+        // Try alternate method
+        createCompletionSoundWithAudioElement();
+    }
+}
+
+// Web Audio API method (primary)
+function createCompletionSoundWithWebAudio() {
+    try {
+        // Use a different variable name to avoid conflicts
+        const celebrationContext = new (window.AudioContext || window.webkitAudioContext)();
+        const currentTime = celebrationContext.currentTime;
         
-        // Fallback to simple audio if Web Audio API is not available
-        try {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLH7U9dF4KAAKW8Pz3o0xAA9Pr+/nlDsAFESj6/GaQgAaPJXn8Z5HAC86heLyoUsARTZ23/GiTwBWL2fa76NTAGYoWdbuo1YAYSNR0+2jWQBaH0jQ66RbAEkaPM/qpVwAMBc2zu2mXQAbFDXO7qdeAAoTNs/wqF0A/xI40fCpWwD2Ezna8KtZAOsUPd/wrlcA4hVD5fCwVQDaFkfr8LJTANEXSfDwtVEAxxdL9PC3TwC+GEz38LlMALYYTPrwukrArxhL+/C8SACoGEn78L1GAKEYRvvwv0QAmhhD+vDBQgCVGD358cNAAJEZOvfxxT4Ajxk39vHHPACNGjT28ck5AIsbMfbxyzYAiRwv9vHNNACHHSz18c8xAIYeKvTx0S8Ahh8n8/HTLACGICXy8dUqAIUhIvLx1ygAhCIf8fHZJgCDJBzx8dskAIInGfHx3SIAgiwW8PHgIAB/MRPw8uIdAHw2EfDy5BsAeDoO8PLmGQB1Pgzv8ugXAHFDCu/y6hQAbUgI7vLsEgBpTAbv8u4PAGVRBe7y8A0AYVcE7vLyDABeXAMt7/QNAFtiAS3v9Q0AU2cALe/2DgBObgAt7/cPAEhzAC7v+BAAQXgALu/5EQA7fQEu7/oSADWCAS/v+xMALoYCL+/8FAAoiwIw7/0VAB+PAjDv/hYAGZMDMO//FwASmAMx8AAZAAwcBQAKHQcACR4JAAgfCwAHIA0ABSEPAAQiEQADIxMAASQVAAAkFwAAJRkAACYaAAAmHAAAJh4AACcfAAAnIQAAJyMAACgkAAAoJgAAKSgAACkpAAApKwAAKSwAACouAAArLwAAKzEAACsyAAArNAAALDUAAC03AAAtOAAALToAAC07AAAtPQAALj4AAC5AADw3Kisp///i2c3Hwr+9vLq5trizsK2qqKWioJ6cmZeUkpCNi4iFgn+9uLWysPXy7urm4t3Y0s3HwLqzraWdlIyDemxcTz0vGA');
-            audio.play().catch(e => console.log('Audio play error:', e.message));
-        } catch (audioError) {
-            console.log('Audio fallback not supported either:', audioError.message);
+        // Preload and create all oscillators immediately
+        const oscillators = [];
+        const gainNodes = [];
+        
+        // Create a happy triumphant sound (5 notes ascending)
+        const celebrationNotes = [
+            { freq: 523.25, time: 0.0, duration: 0.15 },    // C5
+            { freq: 587.33, time: 0.15, duration: 0.15 },   // D5
+            { freq: 659.25, time: 0.3, duration: 0.15 },    // E5
+            { freq: 698.46, time: 0.45, duration: 0.15 },   // F5
+            { freq: 783.99, time: 0.6, duration: 0.3 }      // G5 (longer)
+        ];
+        
+        // Create all oscillators and gain nodes first
+        celebrationNotes.forEach((note, index) => {
+            const osc = celebrationContext.createOscillator();
+            const gain = celebrationContext.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.value = note.freq;
+            
+            gain.gain.setValueAtTime(0, currentTime);
+            gain.gain.linearRampToValueAtTime(0.3, currentTime + note.time + 0.02);
+            gain.gain.setValueAtTime(0.3, currentTime + note.time + note.duration - 0.05);
+            gain.gain.linearRampToValueAtTime(0, currentTime + note.time + note.duration);
+            
+            osc.connect(gain);
+            gain.connect(celebrationContext.destination);
+            
+            oscillators.push(osc);
+            gainNodes.push(gain);
+            
+            // Start immediately
+            osc.start(currentTime + note.time);
+            osc.stop(currentTime + note.time + note.duration + 0.1);
+        });
+        
+        // Create a final triumphant chord
+        setTimeout(() => {
+            try {
+                createTriumphantChord();
+            } catch (e) {
+                console.log('Triumphant chord error:', e.message);
+            }
+        }, 1000);
+        
+    } catch (e) {
+        console.log('Web Audio API sound failed:', e.message);
+    }
+}
+
+// HTML5 Audio fallback method
+function createCompletionSoundWithAudioElement() {
+    try {
+        // Create an Audio element with base64 encoded celebratory sound
+        const audio = new Audio();
+        
+        // This is a short, encoded celebratory sound
+        audio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAkJCQkJCQkJCQkJCQkJCQwMDAwMDAwMDAwMDAwMDAwMD4+Pj4+Pj4+Pj4+Pj4+Pj4//////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAYAAAAAAAAAAbA/C2DLAAAAAAAAAAAAAAAAAAAAAP/jOMAAAAACTGFtZTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/jOMAAAAACTGFtZTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/jOMAAAAACTGFtZTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/jOMAAAAACTGFtZTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/jOMAAAAACTGFtZTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+        
+        // Preload the audio
+        audio.load();
+        
+        // Play the audio with multiple attempts
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log('Audio play error, retry in 100ms:', error);
+                
+                // Try again with user interaction simulation
+                setTimeout(() => {
+                    audio.play().catch(e => {
+                        console.log('Second play attempt failed:', e);
+                        
+                        // Final attempt with another audio context
+                        createSimpleTone();
+                    });
+                }, 100);
+            });
         }
+    } catch (audioError) {
+        console.log('Audio element not supported:', audioError.message);
+        createSimpleTone();
+    }
+}
+
+// Simplest possible tone as last resort
+function createSimpleTone() {
+    try {
+        const simpleContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = simpleContext.createOscillator();
+        const gainNode = simpleContext.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 800; 
+        gainNode.gain.value = 0.5;
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(simpleContext.destination);
+        
+        oscillator.start();
+        
+        setTimeout(() => {
+            oscillator.stop();
+            simpleContext.close();
+        }, 800);
+    } catch (e) {
+        console.log('Even simple tone failed:', e.message);
+    }
+}
+
+// Create a triumphant chord to end the sound
+function createTriumphantChord() {
+    try {
+        const finaleContext = new (window.AudioContext || window.webkitAudioContext)();
+        const currentTime = finaleContext.currentTime;
+        
+        // Create a C major chord (C, E, G)
+        const chordNotes = [
+            { freq: 523.25, gain: 0.2 },  // C5
+            { freq: 659.25, gain: 0.15 }, // E5
+            { freq: 783.99, gain: 0.2 }   // G5
+        ];
+        
+        // Play chord notes
+        chordNotes.forEach(note => {
+            const osc = finaleContext.createOscillator();
+            const gain = finaleContext.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.value = note.freq;
+            
+            gain.gain.setValueAtTime(0, currentTime);
+            gain.gain.linearRampToValueAtTime(note.gain, currentTime + 0.05);
+            gain.gain.setValueAtTime(note.gain, currentTime + 0.5);
+            gain.gain.linearRampToValueAtTime(0, currentTime + 0.8);
+            
+            osc.connect(gain);
+            gain.connect(finaleContext.destination);
+            
+            osc.start(currentTime);
+            osc.stop(currentTime + 0.8);
+        });
+    } catch (e) {
+        console.log('Triumphant chord error:', e.message);
     }
 }
 
@@ -1080,3 +1398,134 @@ document.addEventListener('click', function(event) {
         startTimer();
     }
 }, true);
+
+
+// Add these new elements to the top of your existing timer.js file
+const increaseBtn = document.getElementById('increase-btn');
+const decreaseBtn = document.getElementById('decrease-btn');
+
+// Add these event listeners after your other event listeners
+increaseBtn.addEventListener('click', function() {
+    let currentValue = parseInt(minutesInput.value) || 2;
+    if (currentValue < 60) {
+        minutesInput.value = currentValue + 1;
+        updateDisplayFromInput();
+    }
+});
+
+decreaseBtn.addEventListener('click', function() {
+    let currentValue = parseInt(minutesInput.value) || 2;
+    if (currentValue > 1) {
+        minutesInput.value = currentValue - 1;
+        updateDisplayFromInput();
+    }
+});
+
+// Add these event listeners for long press on buttons
+let incrementInterval;
+let decrementInterval;
+
+// Increase button long press
+increaseBtn.addEventListener('mousedown', function() {
+    // Initial increment
+    let currentValue = parseInt(minutesInput.value) || 2;
+    if (currentValue < 60) {
+        minutesInput.value = currentValue + 1;
+        updateDisplayFromInput();
+    }
+    
+    // Set up interval for continuous increment
+    incrementInterval = setInterval(function() {
+        currentValue = parseInt(minutesInput.value) || 2;
+        if (currentValue < 60) {
+            minutesInput.value = currentValue + 1;
+            updateDisplayFromInput();
+        } else {
+            clearInterval(incrementInterval);
+        }
+    }, 200); // Adjust speed of increment
+});
+
+increaseBtn.addEventListener('mouseup', function() {
+    clearInterval(incrementInterval);
+});
+
+increaseBtn.addEventListener('mouseleave', function() {
+    clearInterval(incrementInterval);
+});
+
+// Decrease button long press
+decreaseBtn.addEventListener('mousedown', function() {
+    // Initial decrement
+    let currentValue = parseInt(minutesInput.value) || 2;
+    if (currentValue > 1) {
+        minutesInput.value = currentValue - 1;
+        updateDisplayFromInput();
+    }
+    
+    // Set up interval for continuous decrement
+    decrementInterval = setInterval(function() {
+        currentValue = parseInt(minutesInput.value) || 2;
+        if (currentValue > 1) {
+            minutesInput.value = currentValue - 1;
+            updateDisplayFromInput();
+        } else {
+            clearInterval(decrementInterval);
+        }
+    }, 200); // Adjust speed of decrement
+});
+
+decreaseBtn.addEventListener('mouseup', function() {
+    clearInterval(decrementInterval);
+});
+
+decreaseBtn.addEventListener('mouseleave', function() {
+    clearInterval(decrementInterval);
+});
+
+// Add touch support for mobile devices
+increaseBtn.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    let currentValue = parseInt(minutesInput.value) || 2;
+    if (currentValue < 60) {
+        minutesInput.value = currentValue + 1;
+        updateDisplayFromInput();
+    }
+    
+    incrementInterval = setInterval(function() {
+        currentValue = parseInt(minutesInput.value) || 2;
+        if (currentValue < 60) {
+            minutesInput.value = currentValue + 1;
+            updateDisplayFromInput();
+        } else {
+            clearInterval(incrementInterval);
+        }
+    }, 200);
+});
+
+increaseBtn.addEventListener('touchend', function() {
+    clearInterval(incrementInterval);
+});
+
+decreaseBtn.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    let currentValue = parseInt(minutesInput.value) || 2;
+    if (currentValue > 1) {
+        minutesInput.value = currentValue - 1;
+        updateDisplayFromInput();
+    }
+    
+    decrementInterval = setInterval(function() {
+        currentValue = parseInt(minutesInput.value) || 2;
+        if (currentValue > 1) {
+            minutesInput.value = currentValue - 1;
+            updateDisplayFromInput();
+        } else {
+            clearInterval(decrementInterval);
+        }
+    }, 200);
+});
+
+decreaseBtn.addEventListener('touchend', function() {
+    clearInterval(decrementInterval);
+});
